@@ -1,0 +1,26 @@
+[project]
+name = "messages-sending"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "rum",email = "rum@example.com"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.1.2,<7.0.0",
+    "python-dotenv>=1.2.4,<2.0.0",
+    "psycopg2-binary>=2.9.13,<3.0.0",
+    "pillow>=12.3.0,<13.0.0",
+    "black>=26.10.1,<27.0.0",
+    "ipython>=9.17.1,<10.0.0",
+    "unidecode>=1.4.0,<2.0.0",
+    "transliterate>=1.10.2,<2.0.0"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
