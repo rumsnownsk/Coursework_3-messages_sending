@@ -115,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = 'Asia/Novosibirsk'
 
 USE_I18N = True
 
@@ -131,11 +131,11 @@ USE_TZ = True
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# MAILERS = {
+#     'default': {
+#         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+#     },
+# }
 
 
 # ============= добавленная мною секция ==============
@@ -145,3 +145,26 @@ STATICFILES_DIRS = (BASE_DIR / 'static',)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+# 1. Базовый адрес отправителя (обязательно для Django)
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@example.com')
+
+# 2. Хост SMTP (например, smtp.gmail.com или smtp.yandex.ru)
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.example.com')
+
+# 3. Порт (обычно 587 для TLS или 465 для SSL)
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+
+# 4. Использовать ли TLS (True/False). Для Gmail/Yandex обычно True.
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+
+# 5. Использовать ли SSL (True/False). Обычно не используется одновременно с TLS.
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
+
+# 6. Логин (email-адрес)
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+
+# 7. Пароль (лучше использовать специальный пароль приложения, а не основной пароль почты)
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
