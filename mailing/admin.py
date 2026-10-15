@@ -36,6 +36,7 @@ class MailingAttemptInline(admin.TabularInline):
     model = MailingAttempt
     extra = 0
     readonly_fields = ('attempt_time', 'status', 'server_response')
+    max_num = 100
 
 
 
@@ -128,6 +129,10 @@ class MailingAdmin(admin.ModelAdmin):
 
 @admin.register(MailingAttempt)
 class MailingAttemptAdmin(admin.ModelAdmin):
-    list_display = ('mailing', 'attempt_time', 'status')
+    list_display = ('mailing', 'formatted_attempt', 'status')
     list_filter = ('status',)
-    readonly_fields = ('attempt_time',)
+    readonly_fields = ('formatted_attempt',)
+
+    def formatted_attempt(self, obj):
+        return obj.attempt_time.strftime('%d.%m.%Y %H:%M')
+    formatted_attempt.short_description = 'Время попытки'
