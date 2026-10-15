@@ -28,24 +28,27 @@ class Message(models.Model):
 
 
 class Mailing(models.Model):
-    STATUS_CREATED = 'Создана'
-    STATUS_RUNNING = 'Запущена'
-    STATUS_COMPLETED = 'Завершена'
+    STATUS_DRAFT = 'draft'
+    STATUS_RUNNING = 'running'
+    STATUS_COMPLETED = 'completed'
+    STATUS_FAILED = 'failed'
 
     STATUS_CHOICES = [
-        (STATUS_CREATED, 'Создана'),
-        (STATUS_RUNNING, 'Запущена'),
+        (STATUS_DRAFT, 'Черновик (создана)'),
+        (STATUS_RUNNING, 'В процессе (запущена)'),
         (STATUS_COMPLETED, 'Завершена'),
+        (STATUS_FAILED, 'Ошибка'),
     ]
     name = models.CharField(max_length=255, verbose_name='Название рассылки', blank=True, null=True)
     start_time = models.DateTimeField(verbose_name='Дата и время первой отправки')
     end_time = models.DateTimeField(verbose_name='Дата и время окончания отправки')
 
     status = models.CharField(
-        max_length=50,
+        max_length=20,
         choices=STATUS_CHOICES,
-        default=STATUS_CREATED,
-        verbose_name='Статус'
+        default=STATUS_DRAFT,
+        verbose_name='Статус',
+        editable=False
     )
 
     message = models.ForeignKey(
@@ -66,7 +69,7 @@ class Mailing(models.Model):
         verbose_name_plural = 'Рассылки'
 
     def __str__(self):
-        return f"Рассылка #{self.pk} — {self.status}"
+        return f"Рассылка #{self.pk} — {self.get_status_display()}"
 
     def save(self, *args, **kwargs):
         if not self.name and self.message_id:
@@ -75,18 +78,18 @@ class Mailing(models.Model):
 
 
 class MailingAttempt(models.Model):
-    STATUS_SUCCESS = 'Успешно'
-    STATUS_FAILED = 'Не успешно'
+    STATUS_SUCCESS = 'success'
+    STATUS_FAILED = 'failed'
 
     STATUS_CHOICES = [
         (STATUS_SUCCESS, 'Успешно'),
-        (STATUS_FAILED, 'Не успешно'),
+        (STATUS_FAILED, 'С ошибкой'),
     ]
 
     # время попытки отправки сообщения
     attempt_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время попытки')
     status = models.CharField(
-        max_length=50,
+        max_length=20,
         choices=STATUS_CHOICES,
         verbose_name='Статус попытки'
     )
@@ -98,6 +101,9 @@ class MailingAttempt(models.Model):
         related_name='attempts',
         verbose_name='Рассылка'
     )
+    success_count = models.PositiveIntegerField(default=0)   # Опционально
+    fail_count = models.PositiveIntegerField(default=0)     # Опционально
+
     class Meta:
         verbose_name = 'Попытка рассылки'
         verbose_name_plural = 'Попытки рассылок'
