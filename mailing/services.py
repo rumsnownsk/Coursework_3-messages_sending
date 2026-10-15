@@ -30,17 +30,18 @@ def send_mailing(mailing):
                     fail_silently=False,
                 )
                 success_count += 1
-                response_lines.append(f"OK: {recipient.email}")
+                # response_lines.append(f"OK: {success_count}")
             except Exception as e:
                 fail_count += 1
-                response_lines.append(f"FAIL: {recipient.email} — {str(e)}")
+                response_lines.append(f"FAIL: {fail_count} — {str(e)}")
 
         overall_status = (
             MailingAttempt.STATUS_SUCCESS
             if fail_count == 0
             else MailingAttempt.STATUS_FAILED
         )
-        response_text = "\n".join(response_lines)
+        # response_text = "\n".join(response_lines)
+        response_text = f"OK: {success_count}; FAIL: {fail_count}"
 
         MailingAttempt.objects.create(
             mailing=mailing,

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Статистика рассылок</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .stat-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            width: 300px;
+        }
+        .value { font-size: 24px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Панель управления рассылками</h1>
+
+    <div class="stat-card">
+        <p>Всего рассылок:</p>
+        <div class="value">{{ total_mailings }}</div>
+    </div>
+
+    <div class="stat-card" style="border-color: #4CAF50; background: #e8f5e9;">
+        <p>Активных рассылок (статус «Запущена»):</p>
+        <div class="value" style="color: #2e7d32;">{{ active_mailings }}</div>
+    </div>
+
+    <div class="stat-card">
+        <p>Уникальных получателей:</p>
+        <div class="value">{{ unique_recipients }}</div>
+    </div>
+</body>
+</html>

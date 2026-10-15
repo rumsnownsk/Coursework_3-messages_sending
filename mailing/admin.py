@@ -129,7 +129,7 @@ class MailingAdmin(admin.ModelAdmin):
 
 @admin.register(MailingAttempt)
 class MailingAttemptAdmin(admin.ModelAdmin):
-    list_display = ('mailing', 'formatted_attempt', 'status')
+    list_display = ('mailing', 'formatted_attempt', 'status', 'server_response')
     list_filter = ('status',)
     readonly_fields = ('formatted_attempt',)
 
