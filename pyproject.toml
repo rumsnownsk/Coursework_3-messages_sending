@@ -1,7 +1,7 @@
 [project]
-name = "messages-sending"
+name = "messages_sending"
 version = "0.1.0"
-description = ""
+description = "Django project for sending messages"
 authors = [
     {name = "rum",email = "rum@example.com"}
 ]
@@ -22,5 +22,5 @@ dependencies = [
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
-package-mode = false
+#[tool.poetry]
+#package-mode = false
