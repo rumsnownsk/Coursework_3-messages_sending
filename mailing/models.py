@@ -1,5 +1,8 @@
 from django.db import models
 
+from config import settings
+
+
 # получатель
 class Recipient(models.Model):
     email = models.EmailField(unique=True, verbose_name='Почта')
@@ -42,6 +45,14 @@ class Mailing(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название рассылки', blank=True, null=True)
     start_time = models.DateTimeField(verbose_name='Дата и время первой отправки')
     end_time = models.DateTimeField(verbose_name='Дата и время окончания отправки')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='mailings',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        verbose_name='Создал рассылку'
+    )
 
     status = models.CharField(
         max_length=20,

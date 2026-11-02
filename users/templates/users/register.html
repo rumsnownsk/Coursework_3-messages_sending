@@ -1,0 +1,32 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+
+<main class="main">
+
+    <div class="container">
+        <div class="mt-5">
+            <a href="{% url 'catalog:products_list' %}" class="btn btn-primary main-all-ategories">На главную</a>
+        </div>
+        <div class="row mt-4 row-gap-4">
+            <div class="col-6">
+                <h2>Форма регистрации</h2>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="buttons-forms d-flex">
+                        <button type="submit" class="btn btn-primary">
+                            Зарегаться
+                        </button>
+                        <a href="{% url 'users:login' %}" class="btn btn-warning  ml-4">Уже регался</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'mailing/base.html' %}
+{% load static %}
+
+
+{% block title %}
+    Статистика рассылок
+{% endblock %}
+
+
+{% block content %}
+    <main class="main">
+        <section class="main-categories">
+
+            <div class="container">
+                {% comment %}<div class="stat-card">
+                    <p>Всего рассылок:</p>
+                    <div class="value">{{ total_mailings }}</div>
+                </div>
+
+                <div class="stat-card" style="border-color: #4CAF50; background: #e8f5e9;">
+                    <p>Активных рассылок (статус «Запущена»):</p>
+                    <div class="value" style="color: #2e7d32;">{{ active_mailings }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <p>Уникальных получателей:</p>
+                    <div class="value">{{ unique_recipients }}</div>
+                </div>{% endcomment %}
+            </div>
+        </section>
+    </main>
+{% endblock %}

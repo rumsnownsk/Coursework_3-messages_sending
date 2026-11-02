@@ -168,3 +168,22 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 
 # 7. Пароль (лучше использовать специальный пароль приложения, а не основной пароль почты)
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+INSTALLED_APPS += ['users']
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'ERROR',  # <-- Вот это главное! Было INFO или DEBUG
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'ERROR',
+    },
+}
