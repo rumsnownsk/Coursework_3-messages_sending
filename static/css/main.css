@@ -188,17 +188,23 @@ main.main {
 .breadcrumb a.active {
     color: #9d9d9d;
 }
+.header-table{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    font-size: 24px;
+    text-align: center;
+}
 
 .stat-field {
     display: flex;
-    margin: auto;
     justify-content: space-around;
     gap: 16px; /* расстояние между карточками */
 }
 
 .stat-card {
     border: 1px solid #ccc;
-    padding: 15px;
+    padding: 12px;
     background: #f9f9f9;
     min-width: 140px; /* чтобы карточки были примерно одинаковыми */
     text-align: center; /* центрируем текст внутри карточки */
@@ -208,7 +214,107 @@ main.main {
     /*font-size: 24px; font-weight: bold; color: #333;*/
 }
 
+
+.messages-container { margin-bottom: 20px; }
+.message-item {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.message-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.message-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.message-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+#id_recipients {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+    display: flex;
+    flex-wrap: wrap;       /* перенос на новую строку, если чекбоксов много */
+    gap: 1rem;
+    width: max-content;
+}
+#id_recipients li {
+    margin-bottom: .5rem;
+}
+
 /* ==================General==================== */
+
+
+/* ==================Register Login Form==================== */
+
+
+.register-form .form-group,
+.register-form div[class*="field"],
+.register-form label + input,
+.register-form label + select,
+.register-form label + textarea {
+    margin-bottom: 20px; /* нужный отступ между полями */
+}
+
+/* Если у тебя поля обернуты в div с классом field — можно точечно: */
+/*.register-form .field {*/
+/*    margin-bottom: 24px;*/
+/*}*/
+
+.input-with-icon {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.input-with-icon input[type="password"],
+.input-with-icon input.password-field {
+    width: 100%;
+    padding-right: 32px; /* место под иконку */
+    box-sizing: border-box;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    color: #666;
+}
+
+.toggle-password:hover {
+    color: #000;
+}
+
+
+.buttons-forms {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+}
+
+/* ==================END Register Login Form==================== */
+
+
+.alert-warning {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background-color: #ffebee; /* очень светлый красный */
+    color: #c62828; /* тёплый тёмно‑красный */
+    border-radius: 8px;
+    font-size: 20px;
+    line-height: 1.4;
+    border-left: 5px solid #ef5350; /* акцентная полоса слева */
+    width: max-content;
+}
+
+.alert-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
 
 
 /* ==================Header==================== */
@@ -1469,7 +1575,3 @@ main.main {
 }
 
 /* ==================Product Page==================== */
-
-.buttons-forms a {
-    margin-left: 30px;
-}

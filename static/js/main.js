@@ -1,5 +1,16 @@
 $(function () {
+    document.querySelectorAll('.toggle-password').forEach(toggler => {
+        toggler.addEventListener('click', function () {
+            const input = this.parentElement.querySelector('input');
+            if (!input) return;
 
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            // Опционально: можно менять иконку (эмодзи)
+            this.textContent = isPassword ? '👁️‍🗨️' : '👁️';
+        });
+    });
 
 
     $('#search-form-btn').on('click', function (e) {
@@ -35,8 +46,6 @@ $(function () {
         });
     }
 
-
-  
 
     $(".phone-mask").mask("+3(999) 999-9999");
 

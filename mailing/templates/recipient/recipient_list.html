@@ -1,0 +1,80 @@
+{% extends 'mailing/../base_dashboard.html' %}
+{% load static %}
+
+{% block title %}
+    Личный кабинет
+{% endblock %}
+
+{% block content %}
+    <!-- БЛОК СООБЩЕНИЙ (чтобы пользователь видел "Письмо отправлено") -->
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="row section_recipients">
+        <div class="header-table">
+            <h3>Ваши Получатели:</h3>
+            <a class="d-flex align-items-center gap-3" href="{% url 'mailing:recipient_create' %}">
+                Добавить Получателя
+            </a>
+        </div>
+        <!-- Сюда позже можно вывести список рассылок -->
+        {% if recipients %}
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Ф. И. О.</th>
+                    <th scope="col">Комментарий</th>
+                    <th scope="col">Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for recipient in recipients %}
+                    <tr>
+                        <th scope="row">{{ recipient.pk }}</th>
+                        <td>
+                            <a href="{% url 'mailing:recipient_update' pk=recipient.pk %}">
+                                {{ recipient.email }}
+                            </a>
+                        </td>
+                        <td>
+                            {{ recipient.full_name }}
+                        </td>
+                        <td>
+                            {{ recipient.comment }}
+                        </td>
+
+                        <td>
+                            <div class="main-categories-card-actions d-flex align-items-center gap-3">
+                                <!-- Редактировать (нейтральный цвет) -->
+                                <a href="{% url 'mailing:recipient_update' pk=recipient.pk %}"
+                                   class="text-dark text-decoration-none"
+                                   title="Редактировать">
+                                    <i class="fa-solid fa-edit"></i>
+                                </a>
+
+                                <!-- Удалить (красный цвет + отступ через gap у родителя) -->
+                                <a href="{% url 'mailing:recipient_delete' pk=recipient.pk %}"
+                                   class="text-danger text-decoration-none"
+                                   title="Удалить">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Пока нет рассылок. Создайте первую!</p>
+        {% endif %}
+    </div>
+
+{% endblock %}

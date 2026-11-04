@@ -9,6 +9,14 @@ class Recipient(models.Model):
     full_name = models.CharField(max_length=255, verbose_name='Ф. И. О.')
     comment = models.TextField(blank=True, null=True, verbose_name='Комментарий')
 
+    # Связь: у каждого пользователя есть свой список получателей
+    users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='my_recipients',  # теперь у user.my_recipients.all() — его личный список
+        blank=True,
+        verbose_name='Пользователи, которым доступен получатель'
+    )
+
     class Meta:
         verbose_name = 'Получатель рассылки'
         verbose_name_plural = 'Получатели рассылок'

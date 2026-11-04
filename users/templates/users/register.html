@@ -7,20 +7,55 @@
 
     <div class="container">
         <div class="mt-5">
-            <a href="{% url 'catalog:products_list' %}" class="btn btn-primary main-all-ategories">На главную</a>
+            <a href="{% url 'mailing:home' %}" class="btn btn-primary main-all-ategories">На главную</a>
         </div>
         <div class="row mt-4 row-gap-4">
             <div class="col-6">
                 <h2>Форма регистрации</h2>
 
-                <form method="POST">
+                <form  class="register-form" method="POST">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="buttons-forms d-flex">
+                    <div class="form-field">
+                        {{ form.username.label_tag }}
+                        {{ form.username }}
+                        {% if form.username.errors %}<div class="error">{{ form.username.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="error">{{ form.email.errors }}</div>{% endif %}
+                    </div>
+
+                        <!-- Поле password1 с глазиком -->
+                    <div class="password-wrapper">
+                        {{ form.password1.label_tag }}
+                        <div class="input-with-icon">
+                            {{ form.password1 }}
+                            <span class="toggle-password" title="Показать/скрыть пароль">
+                                👁️
+                            </span>
+                        </div>
+                        {% if form.password1.errors %}<div class="error">{{ form.password1.errors }}</div>{% endif %}
+                    </div>
+
+                    <!-- Поле password2 с глазиком -->
+                    <div class="password-wrapper">
+                        {{ form.password2.label_tag }}
+                        <div class="input-with-icon">
+                            {{ form.password2 }}
+                            <span class="toggle-password" title="Показать/скрыть пароль">
+                                👁️
+                            </span>
+                        </div>
+                        {% if form.password2.errors %}<div class="error">{{ form.password2.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="buttons-forms">
                         <button type="submit" class="btn btn-primary">
                             Зарегаться
                         </button>
-                        <a href="{% url 'users:login' %}" class="btn btn-warning  ml-4">Уже регался</a>
+                        <a href="{% url 'users:login' %}" class="btn btn-warning  ml-4">Регался раньше</a>
                     </div>
 
                 </form>

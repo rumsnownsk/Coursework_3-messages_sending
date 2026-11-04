@@ -9,6 +9,12 @@ from .utils import get_user_avatar_path
 
 # Create your models here.
 class CustomUser(AbstractUser):
+    email = models.EmailField(
+        blank=True,
+        null=True,  # <--- ЭТО КРИТИЧЕСКИ ВАЖНО
+        verbose_name='Email',
+        unique=False  # уникальность не на уровне поля, а через constraint
+    )
     phone_number = models.CharField(max_length=20, blank=True, null=True, verbose_name='Телефон')
     telegram_id = models.BigIntegerField(
         null=True,
@@ -38,16 +44,19 @@ class CustomUser(AbstractUser):
     # Флаг: заблокирован ли пользователь в плане функционала рассылок
     is_blocked = models.BooleanField(default=False, verbose_name='Заблокирован (нет доступа к рассылкам)')
 
-    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
         ordering = ["username"]
-        # Гарантируем уникальность email на уровне БД
+        # Уникальность email только если он заполнен
         constraints = [
-            models.UniqueConstraint(fields=['email'], name='unique_email_constraint')
+            models.UniqueConstraint(
+                fields=['email'],
+                name='unique_email_constraint',
+                condition=models.Q(email__isnull=False)
+            )
         ]
 
     def __str__(self):

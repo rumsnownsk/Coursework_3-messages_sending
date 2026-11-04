@@ -65,6 +65,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                'mailing.context_processors.common_data'
             ],
         },
     },
@@ -94,30 +96,30 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+# AUTH_PASSWORD_VALIDATORS = [
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+#     },
+# ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'Asia/Novosibirsk'
-
 USE_I18N = True
+USE_L10N = True
 
 USE_TZ = True
 
@@ -169,8 +171,17 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 # 7. Пароль (лучше использовать специальный пароль приложения, а не основной пароль почты)
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
-AUTH_USER_MODEL = 'users.CustomUser'
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 4},
+    },
+    # остальные валидаторы можно убрать или оставить по желанию
+]
 INSTALLED_APPS += ['users']
 
 LOGGING = {
@@ -187,3 +198,6 @@ LOGGING = {
         'level': 'ERROR',
     },
 }
+LOGIN_REDIRECT_URL = 'mailing:mailings'  # или '/', если это имя маршрута
+LOGOUT_REDIRECT_URL = 'mailing:main'  # или страницу логина — что у тебя задумано
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

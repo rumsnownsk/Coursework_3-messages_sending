@@ -1,32 +1,35 @@
 from django.contrib.auth.views import LoginView
+from django.shortcuts import redirect
 from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from django.contrib.auth import login, authenticate
 
-from .forms import CustomUserLoginForm
+from .forms import CustomLoginForm, CustomRegisterForm
 
 
 
 # Create your views here.
 
 class CustomRegisterView(CreateView):
-    pass
-    # template_name = 'users/register.html'
-    # form_class = CustomUserCreationForm
-    # success_url = reverse_lazy('catalog:products_list')
-    #
-    # def form_valid(self, form):
-    #     user = form.save()
-    #
-    #     user_authenticated = authenticate(
-    #         request=self.request,
-    #         username=user.email,
-    #         password=form.cleaned_data['password1'],
-    #         backend='users.backends.EmailAuthBackend'
-    #     )
-    #
-    #     if user_authenticated is None:
-    #         return self.render_to_response(
-    #             self.get_context_data(form=form, error="Не удалось подтвердить пароль")
-    #         )
+    template_name = 'users/register.html'
+    form_class = CustomRegisterForm
+    success_url = reverse_lazy('mailing:home')
+
+
+    def form_valid(self, form):
+        user = form.save()
+
+        authenticated_user = authenticate(
+            request=self.request,
+            username=user.username,
+            password=form.cleaned_data['password1'],
+        )
+
+        if authenticated_user is not None:
+            login(self.request, authenticated_user)
+
+        return redirect('mailing:mailings')
+
     #     # 3. Теперь безопасно делаем login. Django знает, что этот юзер уже проверен твоим бэкендом.
     #     login(self.request, user_authenticated)
     #
@@ -46,5 +49,7 @@ class CustomRegisterView(CreateView):
 
 class CustomLoginView(LoginView):
     template_name = 'users/login.html'  # <-- путь к твоему шаблону login.html
-    form_class = CustomUserLoginForm
+    form_class = CustomLoginForm
     redirect_authenticated_user = True  # если залогинен, не пускать на страницу логина
+    success_url = reverse_lazy('mailing:mailings')  # <-- сюда после успешного входа
+

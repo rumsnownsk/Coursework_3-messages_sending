@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 {% load static %}
+{% load nav_tags %}
 
 <html lang="en">
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lock :: Home</title>
+<title>{% block title %}{% endblock %}</title>
 <link rel="icon" href="{% static 'images/favicon.png' %}">
 <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 <link rel="stylesheet" href="{% static 'fonts/fontawesome-free-6.6.0-web/css/all.min.css' %}">
@@ -25,7 +26,17 @@
 
     {% include 'mailing/includes/inc_menu.html' %}
 
-    {% block content %} {% endblock %}
+    <div class="container mt-3">
+
+    </div>
+
+
+    <main class="main">
+            <div class="container">
+                {% block content %} {% endblock %}
+            </div>
+    </main>
+
 
     {% include 'mailing/includes/inc_footer.html' %}
 
@@ -51,7 +62,6 @@
 <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'js/jquery.spincrement.min.js' %}"></script>
-<!--<script src="{% static 'owlcarousel/owl.carousel.min.js' %}"></script>-->
 <script src="{% static 'js/jquery.maskedinput.min.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="{% static 'js/main.js' %}"></script>

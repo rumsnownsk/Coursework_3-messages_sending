@@ -4,29 +4,51 @@
 
 {% block content %}
 
-<main class="main">
-    <div class="container">
-        <div class="mt-5">
-            <a href="{% url 'mailing:home' %}" class="btn btn-primary main-all-ategories">На главную</a>
-        </div>
+    <main class="main">
+        <div class="container">
+            <div class="mt-5">
+                <a href="{% url 'mailing:home' %}" class="btn btn-primary main-all-ategories">На главную</a>
+            </div>
             <div class="row mt-4 row-gap-4">
                 <div class="col-6">
                     <h2>Вход на сайт</h2>
 
-                    <form method="POST">
+                    <form class="register-form" method="POST">
                         {% csrf_token %}
-                        {{ form.as_p }}
-                        <div class="buttons-forms d-flex">
+                        <!-- Общие ошибки (самое важное!) -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-field">
+                            {{ form.username.label_tag }}
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="error">{{ form.username.errors }}</div>{% endif %}
+                        </div>
+                        <div class="password-wrapper">
+                            {{ form.password.label_tag }}
+                            <div class="input-with-icon">
+                                {{ form.password }}
+                                <span class="toggle-password" title="Показать/скрыть пароль">
+                                    👁️
+                                </span>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="error">{{ form.password.errors }}</div>{% endif %}
+                        </div>
+                        <div class="buttons-forms">
                             <button type="submit" class="btn btn-primary">
                                 Войти
                             </button>
                             <a href="{% url 'users:register' %}" class="btn btn-warning ml-4">Зарегаться</a>
+                            <a href="#" class="btn ml-4">Восстановить пароль</a>
                         </div>
-
                     </form>
+                </div>
             </div>
         </div>
-    </div>
 
-</main>
+    </main>
 {% endblock %}
