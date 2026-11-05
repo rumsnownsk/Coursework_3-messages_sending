@@ -6,80 +6,107 @@
 {% endblock %}
 
 {% block content %}
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-{% endif %}
     <!-- БЛОК СООБЩЕНИЙ (чтобы пользователь видел "Письмо отправлено") -->
 
+    {% include 'mailing/includes/inc_message.html' %}
+
     <div class="row section_mailings">
-        <div class="header-table">
-            <h3>Ваши рассылки:</h3>
-            <a class="d-flex align-items-center gap-3" href="{% url 'mailing:mailing_create' %}">
-                Добавить Рассылку
-            </a>
-        </div>
-        <!-- Сюда позже можно вывести список рассылок -->
-        {% if mailings %}
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Название</th>
-                    <th scope="col">Статус</th>
-                    <th scope="col">Шапка письма</th>
-                    <th scope="col">Старт рассылки</th>
-                    <th scope="col">Конец рассылки</th>
-                    <th scope="col">Действия</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for mailing in mailings %}
+        <form action="{% url 'mailing:mailing_bulk_run' %}" method="post">
+            {% csrf_token %}
+            <div class="header-table">
+                <div class="header-table-left d-flex align-items-center">
+                    <h3>Ваши рассылки:</h3>
+                    <button type="submit" class="btn btn-outline-success ms-3 border-0 p-2 m-2">
+                        🚀 Запустить выбранные рассылки
+                    </button>
+                </div>
+                <a class="d-flex align-items-center gap-3" href="{% url 'mailing:mailing_create' %}">
+                    Добавить Рассылку
+                </a>
+            </div>
+            <!-- Сюда позже можно вывести список рассылок -->
+            {% if mailings %}
+                <table class="table table-striped">
+                    <thead>
                     <tr>
-                        <th scope="row">{{ mailing.pk }}</th>
-                        <td>
-                            <a href="{% url 'mailing:mailing_update' pk=mailing.pk %}">
-                                {{ mailing.name }}
-                            </a>
-                        </td>
-                        <td>
-                            {% if mailing.status == mailing.STATUS_COMPLETED %}
-                                ✅
-                            {% elif mailing.status == mailing.STATUS_DRAFT %}
-                                ⚠️
-                            {% elif mailing.status == mailing.STATUS_FAILED %}
-                                ❌
-                            {% endif %}
-                            {{ mailing.get_status_display }}
-                        </td>
-                        <td>{{ mailing.message.subject }}</td>
-                        <td>{{ mailing.start_time|date:"j F Y | H:i" }}</td>
-                        <td>{{ mailing.end_time|date:"j F Y | H:i" }}</td>
-                        <td>
-                            <div class="main-categories-card-actions d-flex align-items-center gap-3">
-                                <!-- Редактировать (нейтральный цвет) -->
-                                <a href="{% url 'mailing:mailing_update' pk=mailing.pk %}"
-                                   class="text-dark text-decoration-none"
-                                   title="Редактировать">
-                                    <i class="fa-solid fa-edit"></i>
-                                </a>
+                        <th width="30px">
+                            <input type="checkbox"
+                                   id="check-all"
+                                   onclick="toggleAll(this)">
+                        </th>
 
-                                <!-- Удалить (красный цвет + отступ через gap у родителя) -->
-                                <a href="{% url 'mailing:mailing_delete' pk=mailing.pk %}"
-                                   class="text-danger text-decoration-none"
-                                   title="Удалить">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </a>
-                            </div>
-                        </td>
-
+                        <th scope="col">#</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Шапка письма</th>
+                        <th scope="col">Старт рассылки</th>
+                        <th scope="col">Конец рассылки</th>
+                        <th scope="col">Действия</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Пока нет рассылок. Создайте первую!</p>
-        {% endif %}
+                    </thead>
+                    <tbody>
+                    {% for mailing in mailings %}
+                        <tr>
+                            <td>
+                                <input type="checkbox"
+                                       name="mailings"
+                                       value="{{ mailing.pk }}">
+                            </td>
+                            <th scope="row">{{ mailing.pk }}</th>
+                            <td>
+                                <a href="{% url 'mailing:mailing_update' pk=mailing.pk %}">
+                                    {{ mailing.name }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if mailing.status == mailing.STATUS_COMPLETED %}
+                                    ✅
+                                {% elif mailing.status == mailing.STATUS_DRAFT %}
+                                    ⚠️
+                                {% elif mailing.status == mailing.STATUS_FAILED %}
+                                    ❌
+                                {% endif %}
+                                {{ mailing.get_status_display }}
+                            </td>
+                            <td>{{ mailing.message.subject }}</td>
+                            <td>{{ mailing.start_time|date:"j F Y | H:i" }}</td>
+                            <td>{{ mailing.end_time|date:"j F Y | H:i" }}</td>
+                            <td>
+                                <div class="main-categories-card-actions d-flex align-items-center gap-3">
+                                    <!-- Редактировать (нейтральный цвет) -->
+                                    <a href="{% url 'mailing:mailing_update' pk=mailing.pk %}"
+                                       class="text-dark text-decoration-none"
+                                       title="Редактировать">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </a>
+
+                                    <!-- Удалить (красный цвет + отступ через gap у родителя) -->
+                                    <a href="{% url 'mailing:mailing_delete' pk=mailing.pk %}"
+                                       class="text-danger text-decoration-none"
+                                       title="Удалить">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'mailing:mailing_start' mailing.pk %}"
+                                          class="d-inline m-0">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="btn p-0 border-0 bg-transparent text-success d-flex align-items-center"
+                                                style="font-size: 1em;"
+                                                title="Запустить рассылку"
+                                                onclick="return confirm('Запустить рассылку и отправить письма получателям?');">
+                                            <i class="fa-solid fa-play"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Пока нет рассылок. Создайте первую!</p>
+            {% endif %}
+        </form>
     </div>
 {% endblock %}

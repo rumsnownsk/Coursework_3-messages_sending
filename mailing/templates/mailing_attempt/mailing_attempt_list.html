@@ -1,0 +1,57 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}
+    Личный кабинет
+{% endblock %}
+
+{% block content %}
+    <!-- БЛОК СООБЩЕНИЙ (чтобы пользователь видел "Письмо отправлено") -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row section_mailings">
+
+        <h4>Попытки отправки</h4>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Рассылка</th>
+                <th>Статус</th>
+                <th>Успешно</th>
+                <th>Ошибок</th>
+                <th>Ответ сервера</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for attempt in attempts %}
+                <tr>
+                    <td>{{ attempt.attempt_time|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'mailing:attempt_detail' attempt.pk %}">{{ attempt.mailing.name }}</a>
+                    </td>
+                    <td>
+                        {% if attempt.status == 'success' %}
+                            <span class="badge bg-success">Успешно</span>
+                        {% else %}
+                            <span class="badge bg-danger">Ошибка</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ attempt.success_count }}</td>
+                    <td>{{ attempt.fail_count }}</td>
+                    <td>{{ attempt.server_response }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Попыток отправки пока нет.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -89,6 +89,7 @@ class Mailing(models.Model):
         related_name='mailings',
         verbose_name='Получатели'
     )
+    error_traceback = models.TextField(blank=True, null=True, verbose_name='Полный стек ошибки')
 
     class Meta:
         verbose_name = 'Рассылка'
@@ -139,7 +140,39 @@ class MailingAttempt(models.Model):
         return f"{self.mailing_id} — {self.attempt_time} — {self.status}"
 
 
+class AttemptItem(models.Model):
+    """Результат отправки письма одному конкретному получателю."""
 
+    class Status(models.TextChoices):
+        SUCCESS = 'sent', 'Отправлено'
+        FAILED = 'failed', 'Ошибка'
+
+    attempt = models.ForeignKey(
+        MailingAttempt,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Попытка',
+    )
+    recipient = models.ForeignKey(
+        'Recipient',          # подставь имя своей модели получателя
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Получатель',
+    )
+    email = models.EmailField(verbose_name='Email на момент отправки')
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        verbose_name='Статус',
+    )
+    error_message = models.TextField(blank=True, default='', verbose_name='Ошибка')
+
+    def __str__(self):
+        return f'{self.email}: {self.get_status_display()}'
+
+    class Meta:
+        verbose_name = 'Деталь попытки'
+        verbose_name_plural = 'Детали попыток'
 
 
 

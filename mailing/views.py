@@ -1,3 +1,4 @@
+from django.db.models import Model
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
@@ -7,7 +8,7 @@ from django.views.generic import View, ListView, TemplateView, DetailView, Creat
 from mailing.decorators import require_verified_email
 from mailing.forms import *
 from mailing.mixins import EmailVerificationRequiredMixin
-from mailing.models import Mailing, Recipient, Message
+from mailing.models import Mailing, Recipient, Message, MailingAttempt
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
@@ -17,6 +18,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_encode
 
+from mailing.services import send_mailing
 
 User = get_user_model()
 class HomeView(TemplateView):
@@ -36,6 +38,27 @@ class HomeView(TemplateView):
     # context['unique_recipients'] = Recipient.objects.values('email').distinct().count()
     #
     # return context
+
+class MailingAttemptListView(LoginRequiredMixin, ListView):
+    model = MailingAttempt
+    template_name = 'mailing_attempt/mailing_attempt_list.html'
+    context_object_name = 'attempts'
+
+    def get_queryset(self):
+        return (MailingAttempt.objects
+                .filter(mailing__created_by=self.request.user)
+                .select_related('mailing')
+                .order_by('-attempt_time'))
+
+class MailingAttemptDetailView(LoginRequiredMixin, DetailView):
+    model = MailingAttempt
+    template_name = 'mailing_attempt/mailing_attempt_detail.html'
+    context_object_name = 'attempt'
+
+    def get_queryset(self):
+        # Пользователь видит только попытки своих рассылок
+        return MailingAttempt.objects.filter(mailing__created_by=self.request.user)
+
 
 class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
@@ -97,6 +120,53 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         # Защита: пользователь может удалять только свои рассылки
         return Mailing.objects.filter(created_by=self.request.user)
+
+
+class MailingBulkRunView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        selected_ids = request.POST.getlist('mailings')
+        if not selected_ids:
+            messages.warning(request, 'Вы не выбрали ни одной рассылки.')
+            return redirect('mailing:mailings')
+        success_count = 0
+        fail_count = 0
+
+        for pk in selected_ids:
+            is_success, report = send_mailing(int(pk))
+
+            # Можно логировать report в messages.error, если нужно
+            if is_success:
+                success_count += 1
+            else:
+                messages.info(request, report)
+                fail_count +=1
+
+        if success_count > 0:
+            messages.success(request, f'Успешно запущено рассылок: {success_count}')
+        if fail_count > 0:
+            messages.warning(request, f'Рассылки с ошибками: {fail_count}')
+
+        return redirect('mailing:mailings')
+
+class MailingStartView(LoginRequiredMixin, View):
+    """Запуск рассылки вручную по кнопке ▶."""
+    def post(self, request, pk):
+        mailing = get_object_or_404(Mailing, pk=pk, created_by=request.user)
+        if mailing.status==Mailing.STATUS_RUNNING:
+            messages.warning(request, 'Рассылка уже выполняется')
+            return redirect('mailing:mailings')
+
+        # if mailing.status in (Mailing.STATUS_COMPLETED, Mailing.STATUS_FAILED):
+        #     messages.warning(request, 'Рассылка уже завершена или завершилась с ошибкой — повторный запуск недоступен.')
+        #     return redirect('mailing:mailings')
+
+        success, msg = send_mailing(mailing.pk)
+
+        if success:
+            messages.success(request, msg)
+        else:
+            messages.error(request, msg)
+        return redirect('mailing:mailings')
 
 
 class RecipientListView(LoginRequiredMixin, ListView):

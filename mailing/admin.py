@@ -60,6 +60,8 @@ def action_send_mailings(modeladmin, request, queryset):
         messages.success(request, f"{success_count} рассылок успешно отправлено.")
     if error_count:
         messages.error(request, f"В {error_count} рассылках были ошибки.")
+
+
 action_send_mailings.short_description = "Запустить выбранные рассылки"
 
 

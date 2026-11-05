@@ -1,6 +1,6 @@
 from django.urls import path
 from mailing.apps import MailingConfig
-from .models import Message
+from .models import Message, MailingAttempt
 from .views import *
 
 app_name = MailingConfig.name
@@ -8,10 +8,18 @@ app_name = MailingConfig.name
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
-    path('account/', MailingListView.as_view(), name='mailings'),
+
+    path('account/', MailingAttemptListView.as_view(), name='attempts'),
+    path('account/attempt/<int:pk>/', MailingAttemptDetailView.as_view(), name='attempt_detail'),
+
+
+    path('account/mailing', MailingListView.as_view(), name='mailings'),
     path('account/mailing/create', MailingCreateView.as_view(), name='mailing_create'),
     path('account/mailing/<int:pk>/update', MailingUpdateView.as_view(), name='mailing_update'),
     path('account/mailing/<int:pk>/delete', MailingDeleteView.as_view(), name='mailing_delete'),
+
+    path('mailing/run-bulk/', MailingBulkRunView.as_view(), name='mailing_bulk_run'),
+    path('mailin/<int:pk>/start', MailingStartView.as_view(), name='mailing_start'),
 
 
     path('account/recipient', RecipientListView.as_view(), name='recipients'),

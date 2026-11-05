@@ -8,14 +8,7 @@
 {% block content %}
 
     <!-- Уведомления Django (messages) — теперь они точно не сломаются -->
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <!-- Используем стандартные теги: success, warning, error и т.д. -->
-                <li class="alert alert-{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    {% include 'mailing/includes/inc_message.html' %}
 
     <div class="row section_mailings">
         <div class="header-table">

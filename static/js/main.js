@@ -1,3 +1,8 @@
+function toggleAll(source) {
+    document.querySelectorAll('input[name="mailings"]')
+        .forEach(cb => cb.checked = source.checked);
+}
+
 $(function () {
     document.querySelectorAll('.toggle-password').forEach(toggler => {
         toggler.addEventListener('click', function () {
