@@ -1,19 +1,24 @@
 {% if not user.is_email_verified %}
-    <div class="alert-warning">
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
         <span class="alert-icon">⚠️</span>
         <span class="alert-text">Ваш email не подтверждён. Функционал ограничен.</span>
     </div>
 
-
     <div class="verification-block">
-        <p>Чтобы получить полный доступ, укажите email:</p>
-        <!-- action ведёт на наш "контроллер" -->
+        <p>Чтобы получить полный доступ, подтвердите email:</p>
+
         <form method="post" action="{% url 'mailing:request_verification' %}">
             {% csrf_token %}
-            <input type="email" name="email" placeholder="Ваш email" required class="form-control"
-                   style="margin-right: 10px;">
-            <button type="submit" class="btn btn-primary">Верифицироваться по почте</button>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <input type="email"
+                       name="email"
+                       value="{{ user.email|default:'' }}"
+                       placeholder="Ваш email"
+                       required
+                       class="form-control"
+                       style="flex: 1; min-width: 250px;">
+                <button type="submit" class="btn btn-primary">Верифицироваться по почте</button>
+            </div>
         </form>
     </div>
-
 {% endif %}

@@ -20,10 +20,10 @@ urlpatterns = [
     path('account/recipient/<int:pk>/delete', RecipientDeleteView.as_view(), name='recipient_delete'),
 
 
-    path('account/messages', MessageListView.as_view(), name='messages'),
-    # path('account/recipient/create', RecipientCreateView.as_view(), name='recipient_create'),
-    # path('account/recipient/<int:pk>/update', RecipientUpdateView.as_view(), name='recipient_update'),
-    # path('account/recipient/<int:pk>/delete', RecipientDeleteView.as_view(), name='recipient_delete'),
+    path('account/message', MessageListView.as_view(), name='messages'),
+    path('account/message/create', MessageCreateView.as_view(), name='message_create'),
+    path('account/message/<int:pk>/update', MessageUpdateView.as_view(), name='message_update'),
+    path('account/message/<int:pk>/delete', MessageDeleteView.as_view(), name='message_delete'),
 
 
 

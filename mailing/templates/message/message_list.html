@@ -2,17 +2,16 @@
 {% load static %}
 
 {% block title %}
-    Личный кабинет
+    Личный кабинет — Письма
 {% endblock %}
 
 {% block content %}
 
-    {% include 'mailing/includes/inc_email_verify.html' %}
-
-    <!-- БЛОК СООБЩЕНИЙ (чтобы пользователь видел "Письмо отправлено") -->
+    <!-- Уведомления Django (messages) — теперь они точно не сломаются -->
     {% if messages %}
         <ul class="messages">
             {% for message in messages %}
+                <!-- Используем стандартные теги: success, warning, error и т.д. -->
                 <li class="alert alert-{{ message.tags }}">{{ message }}</li>
             {% endfor %}
         </ul>
@@ -20,71 +19,56 @@
 
     <div class="row section_mailings">
         <div class="header-table">
-            <h3>Ваши рассылки:</h3>
-            <a class="d-flex align-items-center gap-3" href="{% url 'mailing:mailing_create' %}">
-                Добавить Рассылку
+            <h3>Ваши шаблоны писем:</h3>
+            <a class="d-flex align-items-center gap-3" href="{% url 'mailing:message_create' %}">
+                Добавить письмо
             </a>
         </div>
-        <!-- Сюда позже можно вывести список рассылок -->
-        {% if mailings %}
+
+        {% if message_list %}
             <table class="table table-striped">
                 <thead>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Название</th>
-                    <th scope="col">Статус</th>
-                    <th scope="col">Шапка письма</th>
-                    <th scope="col">Старт рассылки</th>
-                    <th scope="col">Конец рассылки</th>
+                    <th scope="col">Тема</th>
+                    <th scope="col">Содержимое (фрагмент)</th>
                     <th scope="col">Действия</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for mailing in mailings %}
+                {% for message in message_list %}
                     <tr>
-                        <th scope="row">{{ mailing.pk }}</th>
+                        <th scope="row">{{ message.pk }}</th>
+                        <!-- Тема письма -->
                         <td>
-                            <a href="{% url 'mailing:mailing_update' pk=mailing.pk %}">
-                                {{ mailing.name }}
+                            <a href="{% url 'mailing:message_update' pk=message.pk %}">
+                                {{ message.subject }}
                             </a>
                         </td>
-                        <td>
-                            {% if mailing.status == mailing.STATUS_COMPLETED %}
-                                ✅
-                            {% elif mailing.status == mailing.STATUS_DRAFT %}
-                                ⚠️
-                            {% elif mailing.status == mailing.STATUS_FAILED %}
-                                ❌
-                            {% endif %}
-                            {{ mailing.get_status_display }}
-                        </td>
-                        <td>{{ mailing.message.subject }}</td>
-                        <td>{{ mailing.start_time|date:"j F Y | H:i" }}</td>
-                        <td>{{ mailing.end_time|date:"j F Y | H:i" }}</td>
+                        <!-- Фрагмент тела, чтобы таблица не разъезжалась -->
+                        <td>{{ message.body|truncatechars:60 }}</td>
+
                         <td>
                             <div class="main-categories-card-actions d-flex align-items-center gap-3">
-                                <!-- Редактировать (нейтральный цвет) -->
-                                <a href="{% url 'mailing:mailing_update' pk=mailing.pk %}"
+                                <a href="{% url 'mailing:message_update' pk=message.pk %}"
                                    class="text-dark text-decoration-none"
                                    title="Редактировать">
                                     <i class="fa-solid fa-edit"></i>
                                 </a>
 
-                                <!-- Удалить (красный цвет + отступ через gap у родителя) -->
-                                <a href="{% url 'mailing:mailing_delete' pk=mailing.pk %}"
+                                <a href="{% url 'mailing:message_delete' pk=message.pk %}"
                                    class="text-danger text-decoration-none"
                                    title="Удалить">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </a>
                             </div>
                         </td>
-
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>Пока нет рассылок. Создайте первую!</p>
+            <p>Пока нет шаблонов писем. Создайте первое!</p>
         {% endif %}
     </div>
 {% endblock %}

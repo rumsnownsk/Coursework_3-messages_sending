@@ -1,5 +1,7 @@
 from django import forms
-from django.forms import BooleanField
+
+from django.contrib import messages
+from django.shortcuts import redirect
 
 class StyleMixin:
     """
@@ -43,3 +45,26 @@ class StyleMixin:
                     current_classes.append(self.BASE_INPUT_CLASS)
 
             widget.attrs['class'] = ' '.join(current_classes)
+
+
+
+class EmailVerificationRequiredMixin:
+    """
+    Запрещает создание сущностей, если email не подтверждён.
+    Показывает уведомление и возвращает пользователя обратно.
+    """
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not request.user.is_email_verified:
+            messages.warning(
+                request,
+                'Ваш email не подтверждён. Создание доступно только после подтверждения email — '
+                'проверьте почту или запросите письмо повторно.'
+            )
+            # Возвращаем на ту же страницу, откуда нажали кнопку
+            referer = request.META.get('HTTP_REFERER')
+            if referer:
+                return redirect(referer)
+            # Fallback, если referer пустой (бывает при прямом вводе URL)
+            return redirect('mailing:mailings')
+
+        return super().dispatch(request, *args, **kwargs)

@@ -25,7 +25,9 @@
     {% include 'mailing/includes/inc_header.html' %}
 
     {% include 'mailing/includes/inc_menu.html' %}
-
+    <div class="container mt-3 d-flex justify-content-between">
+        {% include 'mailing/includes/inc_email_verify.html' %}
+    </div>
     <div class="container mt-3">
         <ul class="nav nav-tabs" id="dashboard-tabs">
             <li class="nav-item">
@@ -46,9 +48,7 @@
         </ul>
     </div>
 
-    <div class="container mt-3">
-        {% include 'mailing/includes/inc_email_verify.html' %}
-    </div>
+
 
 
     <main class="main">

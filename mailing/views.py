@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import View, ListView, TemplateView, DetailView, CreateView, UpdateView, DeleteView
 
-from mailing.forms import EmailVerificationForm, MailingForm, RecipientForm
+from mailing.decorators import require_verified_email
+from mailing.forms import *
+from mailing.mixins import EmailVerificationRequiredMixin
 from mailing.models import Mailing, Recipient, Message
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -18,7 +20,7 @@ from django.utils.http import urlsafe_base64_encode
 
 User = get_user_model()
 class HomeView(TemplateView):
-    template_name = 'mailing/templates/main.html'
+    template_name = 'main.html'
 
     # def get_context_data(self, **kwargs):
     # context = super().get_context_data(**kwargs)
@@ -44,6 +46,7 @@ class MailingListView(LoginRequiredMixin, ListView):
         # Только рассылки текущего пользователя
         return Mailing.objects.filter(created_by=self.request.user)
 
+@require_verified_email()
 class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
@@ -101,6 +104,7 @@ class RecipientListView(LoginRequiredMixin, ListView):
     template_name = 'recipient/recipient_list.html'
     # context_object_name = 'recipients'
 
+@require_verified_email()
 class RecipientCreateView(LoginRequiredMixin, CreateView):
     model = Recipient
     form_class = RecipientForm
@@ -153,22 +157,91 @@ class RecipientDeleteView(LoginRequiredMixin, DeleteView):
 
 class MessageListView(LoginRequiredMixin, ListView):
     model = Message
-    template_name = ''
-    context_object_name = 'messages'
+    template_name = 'message/message_list.html'
+    context_object_name = 'message_list'
 
     def get_queryset(self):
-        # Только рассылки текущего пользователя
         return Message.objects.filter(created_by=self.request.user)
+
+@require_verified_email()
+class MessageCreateView(LoginRequiredMixin, CreateView):
+    model = Message
+    form_class = MessageForm
+    template_name = 'message/message_form.html'  # подставь свой путь к шаблону
+
+    def form_valid(self, form):
+        # Создаём объект, но пока не сохраняем в БД
+        message = form.save(commit=False)
+        # Привязываем к текущему пользователю
+        message.created_by = self.request.user
+        message.save()
+
+        # Добавляем уведомление для шаблона (то самое messages)
+        messages.success(self.request, f'Письмо "{message.subject}" успешно создано!')
+        return redirect('mailing:messages')  # имя твоего URL для списка писем
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Создать шаблон письма'
+        return context
+
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
+    model = Message
+    form_class = MessageForm
+    template_name = 'message/message_form.html'  # тот же шаблон, что и для создания
+    context_object_name = 'message'            # в шаблоне будет переменная message (объект)
+
+    def get_queryset(self):
+        """
+        Показываем только те письма, которые принадлежат текущему пользователю.
+        Это защита: пользователь не сможет редактировать чужие письма даже по URL.
+        """
+        return Message.objects.filter(created_by=self.request.user)
+
+    def form_valid(self, form):
+        message = form.save(commit=False)
+        message.created_by = self.request.user
+        message.save()
+
+        messages.success(self.request, f'Письмо "{message.subject}" успешно обновлено!')
+        return redirect('mailing:messages')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Редактировать шаблон письма'
+        return context
+
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
+    model = Message
+    # template_name нужно указать — это страница «Вы уверены, что хотите удалить?»
+    template_name = 'message/message_confirm_delete.html'
+    success_url = reverse_lazy('mailing:messages')
+
+    def get_queryset(self):
+        # Защита: пользователь видит и может удалять только свои письма
+        return Message.objects.filter(created_by=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        subject = obj.subject  # сохраняем тему для уведомления
+        response = super().delete(request, *args, **kwargs)
+        messages.success(request, f'Письмо "{subject}" успешно удалено.')
+        return response
 
 
 class EmailVerificationRequestView(LoginRequiredMixin, View):
+    """
+    Принимает POST с email, сохраняет его пользователю (если нужно)
+    и отправляет письмо со ссылкой для подтверждения.
+    """
     def post(self, request, *args, **kwargs):
-        form = EmailVerificationForm(request.POST)
+        form = EmailVerificationForm(request.POST, current_user=request.user)
+
         if form.is_valid():
             new_email = form.cleaned_data['email']
             user = request.user
 
-            # 1. Сохраняем email, если его не было
+            # 1. Сохраняем email, если его не было или он ещё не подтверждён
             if not user.email or not user.is_email_verified:
                 user.email = new_email
                 user.is_email_verified = False
@@ -178,8 +251,11 @@ class EmailVerificationRequestView(LoginRequiredMixin, View):
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
 
-            # 3. Ссылка
-            verification_link = f"{request.scheme}://{request.get_host()}/verify-email/{uid}/{token}/"
+            # 3. Собираем ссылку через reverse, чтобы не хардкодить путь
+            path = reverse('mailing:verify_email_confirm', kwargs={
+                'uidb64': uid, 'token': token
+            })
+            verification_link = request.build_absolute_uri(path)
 
             # 4. Отправляем письмо
             subject = "Подтверждение email для messages_sending"
@@ -195,14 +271,18 @@ class EmailVerificationRequestView(LoginRequiredMixin, View):
                 [user.email],
                 fail_silently=False,
             )
+
             messages.success(request, "✅ Ссылка для подтверждения отправлена на ваш email!")
             return redirect('mailing:mailings')
 
-        messages.error(request, "Ошибка в данных формы.")
+        # Показываем конкретные ошибки валидации
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                messages.error(request, error)
         return redirect('mailing:mailings')
 
-    # GET-запрос сюда вообще не должен приходить от формы,
-    # но если кто-то зайдет по URL, пусть тоже идёт на дашборд
+    # GET-запрос сюда приходить от формы не должен,
+    # но если кто-то зайдёт по URL — отправляем на дашборд
     def get(self, request, *args, **kwargs):
         return redirect('mailing:mailings')
 

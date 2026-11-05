@@ -29,6 +29,13 @@ class Recipient(models.Model):
 class Message(models.Model):
     subject = models.CharField(max_length=255, verbose_name='Тема письма')
     body = models.TextField(verbose_name='Тело письма')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='Автор сообщения',
+        related_name='messages',  # удобно: user.messages.all()
+        blank=True, null=True
+    )
 
     class Meta:
         verbose_name = 'Сообщение'

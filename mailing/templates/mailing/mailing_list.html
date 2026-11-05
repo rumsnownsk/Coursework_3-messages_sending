@@ -6,17 +6,12 @@
 {% endblock %}
 
 {% block content %}
-
-    {% include 'mailing/includes/inc_email_verify.html' %}
-
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
     <!-- БЛОК СООБЩЕНИЙ (чтобы пользователь видел "Письмо отправлено") -->
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li class="alert alert-{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
 
     <div class="row section_mailings">
         <div class="header-table">

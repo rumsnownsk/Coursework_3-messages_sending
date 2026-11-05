@@ -200,4 +200,9 @@ LOGGING = {
 }
 LOGIN_REDIRECT_URL = 'mailing:mailings'  # или '/', если это имя маршрута
 LOGOUT_REDIRECT_URL = 'mailing:main'  # или страницу логина — что у тебя задумано
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+import logging
+logging.basicConfig()
+logging.getLogger('django.request').setLevel(logging.DEBUG)
+
