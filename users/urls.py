@@ -10,5 +10,5 @@ app_name = UsersConfig.name
 urlpatterns = [
     path('register/', CustomRegisterView.as_view(), name='register'),
     path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='mailing:home'), name='logout')
+    path('logout/', LogoutView.as_view(next_page='mailing:main'), name='logout')
 ]

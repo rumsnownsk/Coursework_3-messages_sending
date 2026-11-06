@@ -7,7 +7,7 @@ from django.views.generic import View, ListView, TemplateView, DetailView, Creat
 
 from mailing.decorators import require_verified_email
 from mailing.forms import *
-from mailing.mixins import EmailVerificationRequiredMixin
+from mailing.mixins import EmailVerificationRequiredMixin, ManagerRequiredMixin
 from mailing.models import Mailing, Recipient, Message, MailingAttempt
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -17,27 +17,16 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_encode
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
-from mailing.services import send_mailing
+from mailing.services import send_mailing, get_visible_mailings, get_visible_recipients
 
 User = get_user_model()
+
+@method_decorator(cache_page(60 * 1), name='dispatch')   # 5 минут
 class HomeView(TemplateView):
     template_name = 'main.html'
-
-    # def get_context_data(self, **kwargs):
-    # context = super().get_context_data(**kwargs)
-    #
-    # # 1. Всего рассылок
-    # context['total_mailings'] = Mailing.objects.count()
-    #
-    # # 2. Активных рассылок (статус 'Запущена')
-    # context['active_mailings'] = Mailing.objects.filter(status='Запущена').count()
-    #
-    # # 3. Уникальных получателей
-    # # Если у тебя модель Recipient с полем email:
-    # context['unique_recipients'] = Recipient.objects.values('email').distinct().count()
-    #
-    # return context
 
 class MailingAttemptListView(LoginRequiredMixin, ListView):
     model = MailingAttempt
@@ -66,8 +55,8 @@ class MailingListView(LoginRequiredMixin, ListView):
     context_object_name = 'mailings'
 
     def get_queryset(self):
-        # Только рассылки текущего пользователя
-        return Mailing.objects.filter(created_by=self.request.user)
+        return get_visible_mailings(self.request.user)
+
 
 @require_verified_email()
 class MailingCreateView(LoginRequiredMixin, CreateView):
@@ -89,7 +78,6 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         form.save_m2m()
         return redirect('mailing:mailings')
         # return super().form_valid(form)
-
 
 class MailingUpdateView(LoginRequiredMixin, UpdateView):
     model = Mailing
@@ -123,6 +111,9 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class MailingBulkRunView(LoginRequiredMixin, View):
+    """
+    Функция для массовой рассылки
+    """
     def post(self, request, *args, **kwargs):
         selected_ids = request.POST.getlist('mailings')
         if not selected_ids:
@@ -156,9 +147,16 @@ class MailingStartView(LoginRequiredMixin, View):
             messages.warning(request, 'Рассылка уже выполняется')
             return redirect('mailing:mailings')
 
+        if mailing.status == Mailing.STATUS_BLOCKED:
+            messages.error(request, 'Рассылка отключена менеджером — запустить её нельзя.')
+            return redirect('mailing:mailings')
+
         # if mailing.status in (Mailing.STATUS_COMPLETED, Mailing.STATUS_FAILED):
         #     messages.warning(request, 'Рассылка уже завершена или завершилась с ошибкой — повторный запуск недоступен.')
         #     return redirect('mailing:mailings')
+
+        mailing.status = Mailing.STATUS_RUNNING
+        mailing.save(update_fields=['status'])
 
         success, msg = send_mailing(mailing.pk)
 
@@ -172,7 +170,10 @@ class MailingStartView(LoginRequiredMixin, View):
 class RecipientListView(LoginRequiredMixin, ListView):
     model = Recipient
     template_name = 'recipient/recipient_list.html'
-    # context_object_name = 'recipients'
+    context_object_name = 'recipients'   # или 'object_list'
+
+    def get_queryset(self):
+        return get_visible_recipients(self.request.user)
 
 @require_verified_email()
 class RecipientCreateView(LoginRequiredMixin, CreateView):
@@ -197,7 +198,6 @@ class RecipientCreateView(LoginRequiredMixin, CreateView):
 
         # Сценарий 2: email новый — создаём как обычно
         return super().post(request, *args, **kwargs)
-
 
     def form_valid(self, form):
         recipient = form.save()
@@ -376,3 +376,69 @@ class EmailVerificationConfirmView(View):
         else:
             messages.error(request, "Неверная или истёкшая ссылка для подтверждения.")
             return redirect('mailing:mailings')
+
+
+
+
+class UserListView(LoginRequiredMixin, ManagerRequiredMixin, ListView):
+    model = User
+    template_name = 'mailing/user_list.html'
+    context_object_name = 'users'
+
+
+class UserBlockView(LoginRequiredMixin, ManagerRequiredMixin, View):
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        if user.is_superuser:
+            messages.error(request, 'Суперпользователя блокировать нельзя.')
+            return redirect('mailing:user_list')
+
+        user.is_active = not user.is_active   # одна кнопка: заблокировать/разблокировать
+        user.save(update_fields=['is_active'])
+        messages.success(
+            request,
+            f'Пользователь {user.username} '
+            f'{"разблокирован" if user.is_active else "заблокирован"}.'
+        )
+        return redirect('mailing:user_list')
+
+
+class MailingDisableView(LoginRequiredMixin, ManagerRequiredMixin, View):
+    def post(self, request, pk):
+        mailing = get_object_or_404(Mailing, pk=pk)
+        if mailing:
+            mailing.status = Mailing.STATUS_COMPLETED
+            mailing.save(update_fields=['status'])
+            messages.success(request, 'Рассылка отключена.')
+        else:
+            messages.warning(request, 'Отключать можно только запущенные рассылки.')
+        return redirect('mailing:mailings')
+
+
+class MailingBlockToggleView(LoginRequiredMixin, ManagerRequiredMixin, View):
+    def post(self, request, pk):
+        mailing = get_object_or_404(Mailing, pk=pk)
+
+        if mailing.status == Mailing.STATUS_BLOCKED:
+            mailing.status = Mailing.STATUS_DRAFT
+            messages.success(request, f'Рассылка «{mailing.name}» разблокирована.')
+        else:
+            mailing.status = Mailing.STATUS_BLOCKED
+            messages.success(request, f'Рассылка «{mailing.name}» отключена.')
+
+        mailing.save(update_fields=['status'])
+        return redirect('mailing:mailings')
+
+class MailingStopView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        mailing = get_object_or_404(Mailing, pk=pk, created_by=request.user)
+        if mailing.status == Mailing.STATUS_RUNNING:
+            mailing.status = Mailing.STATUS_DRAFT
+            mailing.save(update_fields=['status'])
+            messages.success(request, f'Рассылка «{mailing.name}» остановлена и возвращена в черновик.')
+        else:
+            messages.warning(request, 'Остановить можно только запущенную рассылку.')
+
+        return redirect('mailing:mailing_update', pk=mailing.pk)
+
+

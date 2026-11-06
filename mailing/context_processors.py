@@ -1,5 +1,7 @@
+from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.db.models import Count
 
 from mailing.models import Mailing, Recipient
 
@@ -10,20 +12,30 @@ def common_data(request):
         now = timezone.now()
 
         return {
-            'recipients': Recipient.objects.filter(users=request.user),
+            'is_manager': (
+                request.user.is_superuser
+                or request.user.groups.filter(name='Менеджер').exists()
+            ),
             'total_mailings': user_mailings.count(),
             'active_mailings': user_mailings.filter(
                 status=Mailing.STATUS_RUNNING,
                 start_time__lte=now,
                 end_time__gte=now
             ).count(),
+            'unique_recipients': user_mailings.aggregate(
+                total=Count('recipients', distinct=True)
+            )['total'],
+
         }
 
-    all_mailings = Mailing.objects.all()
-    user = get_user_model()
     return {
-        'recipients': Recipient.objects.none(),  # пустой список вместо отсутствия ключа
-        'total_users': user.objects.count(),
-        'total_mailings': all_mailings.count(),
-        'active_mailings': all_mailings.filter(status=Mailing.STATUS_RUNNING).count(),
+        'is_manager': False,
+        'recipients': Recipient.objects.none(),
+        'total_users': get_user_model().objects.count(),
+        'latest_mailings': (
+            Mailing.objects
+            .select_related('created_by', 'message')
+            .annotate(recipients_count=Count('recipients'))
+            .order_by('-created_at')[:10]
+        ),
     }

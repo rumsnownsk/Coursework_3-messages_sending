@@ -16,6 +16,15 @@ class Recipient(models.Model):
         blank=True,
         verbose_name='Пользователи, которым доступен получатель'
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания',
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата изменения',
+    )
 
     class Meta:
         verbose_name = 'Получатель рассылки'
@@ -37,6 +46,15 @@ class Message(models.Model):
         blank=True, null=True
     )
 
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания',
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата изменения',
+    )
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
@@ -50,12 +68,15 @@ class Mailing(models.Model):
     STATUS_RUNNING = 'running'
     STATUS_COMPLETED = 'completed'
     STATUS_FAILED = 'failed'
+    STATUS_BLOCKED = 'blocked'          # новый
+
 
     STATUS_CHOICES = [
         (STATUS_DRAFT, 'Черновик (создана)'),
         (STATUS_RUNNING, 'В процессе (запущена)'),
         (STATUS_COMPLETED, 'Завершена'),
         (STATUS_FAILED, 'Ошибка'),
+        (STATUS_BLOCKED, 'Заблокировано'),
     ]
     name = models.CharField(max_length=255, verbose_name='Название рассылки', blank=True, null=True)
     start_time = models.DateTimeField(verbose_name='Дата и время первой отправки')
@@ -88,6 +109,15 @@ class Mailing(models.Model):
         Recipient,
         related_name='mailings',
         verbose_name='Получатели'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания',
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата изменения',
     )
     error_traceback = models.TextField(blank=True, null=True, verbose_name='Полный стек ошибки')
 
@@ -130,7 +160,15 @@ class MailingAttempt(models.Model):
     )
     success_count = models.PositiveIntegerField(default=0)   # Опционально
     fail_count = models.PositiveIntegerField(default=0)     # Опционально
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания',
+    )
 
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата изменения',
+    )
     class Meta:
         verbose_name = 'Попытка рассылки'
         verbose_name_plural = 'Попытки рассылок'

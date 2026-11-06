@@ -1,0 +1,48 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}
+    Личный кабинет
+{% endblock %}
+
+{% block content %}
+    <!-- БЛОК СООБЩЕНИЙ (чтобы пользователь видел "Письмо отправлено") -->
+
+    {% include 'mailing/includes/inc_message.html' %}
+
+
+    <!-- Сюда позже можно вывести список рассылок -->
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+        <tr>
+            <th>Логин</th>
+            <th>Email</th>
+            <th class="text-center">Статус</th>
+            <th class="text-end">Действие</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td class="text-center">
+                    {% if u.is_active %}<span class="badge bg-success">Активен</span>
+                    {% else %}<span class="badge bg-secondary">Заблокирован</span>{% endif %}
+                </td>
+                <td class="text-end">
+                    {% if not u.is_superuser %}
+                        <form method="post" action="{% url 'mailing:user_block' u.pk %}" class="d-inline m-0">
+                            {% csrf_token %}
+                            <button class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                                {% if u.is_active %}Заблокировать{% else %}Разблокировать{% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

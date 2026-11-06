@@ -1,0 +1,13 @@
+{% if mailing.status == 'draft' %}
+    <form method="post"
+          action="{% url 'mailing:mailing_start' mailing.pk %}"
+          class="d-inline m-0">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn p-0 border-0 bg-transparent text-success"
+                title="Запустить рассылку"
+                onclick="return confirm('Запустить рассылку и отправить письма получателям?');">
+            <i class="fa-solid fa-play"></i>
+        </button>
+    </form>
+{% endif %}

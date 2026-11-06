@@ -2,6 +2,10 @@ from django import forms
 
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+from config import settings
+
 
 class StyleMixin:
     """
@@ -68,3 +72,14 @@ class EmailVerificationRequiredMixin:
             return redirect('mailing:mailings')
 
         return super().dispatch(request, *args, **kwargs)
+
+
+class ManagerRequiredMixin(UserPassesTestMixin):
+    """Доступ только для менеджеров и суперпользователей."""
+
+    def test_func(self):
+        user = self.request.user
+        return user.is_authenticated and (
+            user.is_superuser
+            or user.groups.filter(name=settings.MANAGER_GROUP_NAME).exists()
+        )

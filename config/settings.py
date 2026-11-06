@@ -206,3 +206,26 @@ import logging
 logging.basicConfig()
 logging.getLogger('django.request').setLevel(logging.DEBUG)
 
+MANAGER_GROUP_NAME = 'Менеджер'
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': config('REDIS_URL', default='redis://127.0.0.1:6379/1'),
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         },
+#         'KEY_PREFIX': 'mailing',   # чтобы ключи не пересекались с другими проектами
+#     }
+# }
+
+CACHE_ENABLED = os.getenv('CACHE', 'True') == 'True'
+
+if CACHE_ENABLED:
+    CACHES = {
+        'default':{
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': 'redis://127.0.0.1:6379/1'
+        }
+    }
+

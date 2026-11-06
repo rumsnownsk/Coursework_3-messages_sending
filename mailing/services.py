@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.timezone import now
 
-from .models import Mailing, MailingAttempt, AttemptItem
+from .models import Mailing, MailingAttempt, AttemptItem, Recipient
 
 
 def send_mailing(mailing_id):
@@ -93,3 +93,20 @@ def send_mailing(mailing_id):
         mailing.error_traceback = traceback.format_exc()
         mailing.save()
         return False, str(e)
+
+
+def is_manager(user):
+        return user.is_superuser or user.groups.filter(name='Менеджер').exists()
+
+
+def get_visible_mailings(user):
+    qs = Mailing.objects.select_related('created_by', 'message')
+
+    return qs if is_manager(user) else qs.filter(created_by=user)
+
+def get_visible_recipients(user):
+    qs = Recipient.objects.all()
+    if is_manager(user):
+        return qs
+    else:
+        return qs.filter(users=user)

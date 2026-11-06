@@ -31,7 +31,9 @@
                     <th scope="col">Email</th>
                     <th scope="col">Ф. И. О.</th>
                     <th scope="col">Комментарий</th>
+                    {% if not is_manager %}
                     <th scope="col">Действия</th>
+                    {% endif %}
                 </tr>
                 </thead>
                 <tbody>
@@ -53,6 +55,7 @@
                         <td>
                             <div class="main-categories-card-actions d-flex align-items-center gap-3">
                                 <!-- Редактировать (нейтральный цвет) -->
+                                {% if not is_manager %}
                                 <a href="{% url 'mailing:recipient_update' pk=recipient.pk %}"
                                    class="text-dark text-decoration-none"
                                    title="Редактировать">
@@ -65,6 +68,8 @@
                                    title="Удалить">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </a>
+                                {% endif %}
+
                             </div>
                         </td>
 

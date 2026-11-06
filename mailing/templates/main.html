@@ -9,24 +9,140 @@
 
 {% block content %}
     <main class="main">
-        <section class="main-categories">
+        <section class="hero py-5 bg-light">
+            <div class="container text-center">
+                <h1 class="fw-bold mb-3">Управляйте рассылками без боли</h1>
+                <p class="lead text-muted mb-4">
+                    Создавайте, отправляйте и анализируйте email‑рассылки — всё в одном интерфейсе.
+                </p>
 
-            <div class="container">
-                {% comment %}<div class="stat-card">
-                    <p>Всего рассылок:</p>
-                    <div class="value">{{ total_mailings }}</div>
-                </div>
-
-                <div class="stat-card" style="border-color: #4CAF50; background: #e8f5e9;">
-                    <p>Активных рассылок (статус «Запущена»):</p>
-                    <div class="value" style="color: #2e7d32;">{{ active_mailings }}</div>
-                </div>
-
-                <div class="stat-card">
-                    <p>Уникальных получателей:</p>
-                    <div class="value">{{ unique_recipients }}</div>
-                </div>{% endcomment %}
+                <!-- Кнопка регистрации -->
+                <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg px-4">Начать бесплатно</a>
             </div>
         </section>
+
+        <section class="py-5">
+            <div class="container">
+                <h2 class="mb-4 text-center">Примеры рассылок, которые делают пользователи</h2>
+                <div class="row g-4">
+                    <!-- Пример карточки (в продакшене подставляй из контекста Django) -->
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <span class="badge bg-success mb-2">Новая</span>
+                                <h4 class="card-title">Дайджест недели: лучшие статьи</h4>
+                                <p class="card-text text-muted small">
+                                    Рассылка для подписчиков блога. Открываемость: ~42%, кликов: 123.
+                                </p>
+                                <div class="mt-auto">
+                                    <a href="{% url 'users:register' %}" class="btn btn-outline-primary btn-sm w-100">Посмотреть
+                                        пример</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <span class="badge bg-warning mb-2">Промо</span>
+                                <h4 class="card-title">Скидка 20% на все товары</h4>
+                                <p class="card-text text-muted small">
+                                    Промо‑рассылка интернет‑магазина. Открываемость: ~38%, кликов: 89.
+                                </p>
+                                <div class="mt-auto">
+                                    <a href="{% url 'users:register' %}" class="btn btn-outline-primary btn-sm w-100">Посмотреть
+                                        пример</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <span class="badge bg-info mb-2">Инфо</span>
+                                <h4 class="card-title">Как подготовить письмо к отправке</h4>
+                                <p class="card-text text-muted small">
+                                    Обучающая рассылка для новичков. Открываемость: ~51%, кликов: 210.
+                                </p>
+                                <div class="mt-auto">
+                                    <a href="{% url 'users:register' %}" class="btn btn-outline-primary btn-sm w-100">Посмотреть
+                                        пример</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-5">
+            <div class="container">
+                <h2 class="mb-4 text-center">Примеры рассылок, которые делают пользователи</h2>
+                <div class="row g-4">
+                    {% if latest_mailings %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">Название</th>
+                <th scope="col">Автор</th>
+                <th scope="col">Создана</th>
+                <th scope="col">Период отправки</th>
+                <th scope="col" class="text-center">Получателей</th>
+                <th scope="col" class="text-center">Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mailing in latest_mailings %}
+            <tr>
+                <td>
+                    <strong>{{ mailing.name|default:mailing.message.subject|default:"Без названия" }}</strong>
+                    <br>
+                    <small class="text-muted">{{ mailing.message.subject }}</small>
+                </td>
+                <td>
+                    {{ mailing.created_by.username|default:"Аноним" }}
+                </td>
+                <td>
+                    {{ mailing.created_at|date:"d.m.Y" }}
+                    <br>
+                    <small class="text-muted">{{ mailing.created_at|date:"H:i" }}</small>
+                </td>
+                <td>
+                    <small>
+                        с {{ mailing.start_time|date:"d.m.Y" }}<br>
+                        по {{ mailing.end_time|date:"d.m.Y" }}
+                    </small>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-info text-dark">{{ mailing.recipients_count }}</span>
+                </td>
+                <td class="text-center">
+                    {% if mailing.status == 'draft' %}
+                        <span class="badge bg-secondary">Черновик</span>
+                    {% elif mailing.status == 'running' %}
+                        <span class="badge bg-warning text-dark">Запущена</span>
+                    {% elif mailing.status == 'completed' %}
+                        <span class="badge bg-success">Завершена</span>
+                    {% else %}
+                        <span class="badge bg-danger">Ошибка</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-light border">
+    Пока нет публичных примеров рассылок — <a href="{% url 'users:register' %}">создайте первую!</a>
+</div>
+{% endif %}
+                </div>
+            </div>
+        </section>
+
     </main>
 {% endblock %}

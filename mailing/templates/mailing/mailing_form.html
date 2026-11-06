@@ -1,13 +1,7 @@
 {% extends 'base_dashboard.html' %}
 {% block content %}
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+    {% include 'mailing/includes/inc_message.html' %}
+
     <div class="container mt-5">
         <a href="{% url 'mailing:mailings' %}" class="btn btn-primary main-all-ategories">← назад</a>
     </div>
@@ -15,12 +9,30 @@
     <div class="container mt-4">
         <div class="row row-gap-4">
             <div class="col-6">
+                {# --- Статус и кнопка остановки: СОСЕДНЯЯ форма, не внутри основной --- #}
                 {% if object %}
-                    <h2>Параметры рассылки</h2>
-                {% else %}
-                    <h2>Создание рассылки</h2>
+                    <div class="mb-3 d-flex align-items-center gap-3">
+                        <div class="fw-bold">
+                            Статус: {% include 'mailing/includes/inc_indicator_status.html' %}
+                        </div>
+
+                        {% if object.status == 'running' %}
+                            <form method="post"
+                                  action="{% url 'mailing:mailing_stop' object.pk %}"
+                                  class="d-inline m-0">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Остановить рассылку? Письма больше не будут отправляться.');">
+                                    ⏹ Остановить
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
                 {% endif %}
-                <form method="post" novalidate>
+                {% if object %}<h2>Параметры рассылки</h2>{% else %}<h2>Создание рассылки</h2>{% endif %}
+
+                <form method="post" class="mt-2" novalidate>
                     {% csrf_token %}
                     <!-- Ошибки формы целиком (те, что подняты в clean()) -->
                     {% if form.non_field_errors %}

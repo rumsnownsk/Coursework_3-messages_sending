@@ -292,6 +292,11 @@ main.main {
 /*    display: block;*/
 /*}*/
 
+.badge-lg {
+    font-size: 0.9rem;
+    padding: 0.6em 0.9em;
+}
+
 /* ==================General==================== */
 
 

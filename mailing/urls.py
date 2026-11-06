@@ -7,7 +7,7 @@ app_name = MailingConfig.name
 
 
 urlpatterns = [
-    path('', HomeView.as_view(), name='home'),
+    path('', HomeView.as_view(), name='main'),
 
     path('account/', MailingAttemptListView.as_view(), name='attempts'),
     path('account/attempt/<int:pk>/', MailingAttemptDetailView.as_view(), name='attempt_detail'),
@@ -40,6 +40,10 @@ urlpatterns = [
 
     path('verify-email/<uidb64>/<token>/', EmailVerificationConfirmView.as_view(), name='verify_email_confirm'),
 
+    path('users/', UserListView.as_view(), name='user_list'),
+    path('users/<int:pk>/block/', UserBlockView.as_view(), name='user_block'),
+    path('mailing/<int:pk>/toggle/', MailingBlockToggleView.as_view(), name='mailing_toggle'),
+    path('mailing/<int:pk>/stop/', MailingStopView.as_view(), name='mailing_stop'),
 
 ]
 
