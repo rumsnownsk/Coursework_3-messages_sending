@@ -1,10 +1,49 @@
 from django.urls import path
 from mailing.apps import MailingConfig
-from .views import HomeView
+from .models import Message, MailingAttempt
+from .views import *
 
 app_name = MailingConfig.name
 
 
 urlpatterns = [
-    path('', HomeView.as_view(), name='home'),
+    path('', HomeView.as_view(), name='main'),
+
+    path('account/', MailingAttemptListView.as_view(), name='attempts'),
+    path('account/attempt/<int:pk>/', MailingAttemptDetailView.as_view(), name='attempt_detail'),
+
+
+    path('account/mailing', MailingListView.as_view(), name='mailings'),
+    path('account/mailing/create', MailingCreateView.as_view(), name='mailing_create'),
+    path('account/mailing/<int:pk>/update', MailingUpdateView.as_view(), name='mailing_update'),
+    path('account/mailing/<int:pk>/delete', MailingDeleteView.as_view(), name='mailing_delete'),
+
+    path('mailing/run-bulk/', MailingBulkRunView.as_view(), name='mailing_bulk_run'),
+    path('mailin/<int:pk>/start', MailingStartView.as_view(), name='mailing_start'),
+
+
+    path('account/recipient', RecipientListView.as_view(), name='recipients'),
+    path('account/recipient/create', RecipientCreateView.as_view(), name='recipient_create'),
+    path('account/recipient/<int:pk>/update', RecipientUpdateView.as_view(), name='recipient_update'),
+    path('account/recipient/<int:pk>/delete', RecipientDeleteView.as_view(), name='recipient_delete'),
+
+
+    path('account/message', MessageListView.as_view(), name='messages'),
+    path('account/message/create', MessageCreateView.as_view(), name='message_create'),
+    path('account/message/<int:pk>/update', MessageUpdateView.as_view(), name='message_update'),
+    path('account/message/<int:pk>/delete', MessageDeleteView.as_view(), name='message_delete'),
+
+
+
+
+    path('request-verification/', EmailVerificationRequestView.as_view(), name='request_verification'),
+
+    path('verify-email/<uidb64>/<token>/', EmailVerificationConfirmView.as_view(), name='verify_email_confirm'),
+
+    path('users/', UserListView.as_view(), name='user_list'),
+    path('users/<int:pk>/block/', UserBlockView.as_view(), name='user_block'),
+    path('mailing/<int:pk>/toggle/', MailingBlockToggleView.as_view(), name='mailing_toggle'),
+    path('mailing/<int:pk>/stop/', MailingStopView.as_view(), name='mailing_stop'),
+
 ]
+

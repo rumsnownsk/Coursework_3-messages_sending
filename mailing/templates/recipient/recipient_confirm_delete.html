@@ -1,0 +1,17 @@
+{% extends 'mailing/../base_dashboard.html' %}
+{% block content %}
+    <div class="container mt-5">
+        <a href="{% url 'mailing:recipients' %}" class="btn btn-primary main-all-ategories">Назад</a>
+    </div>
+    <div class="container mt-4">
+    <h2>Убрать получателя из вашего списка?</h2>
+    <p>Получатель <strong>{{ object.full_name }} ({{ object.email }})</strong> будет удалён только из вашего списка.
+       Сама запись останется в системе и будет доступна другим пользователям.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Убрать из моего списка</button>
+        <a href="{% url 'mailing:recipients' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

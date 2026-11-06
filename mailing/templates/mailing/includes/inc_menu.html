@@ -1,0 +1,63 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg top-navbar sticky-top">
+    <div class="container d-flex align-items-center">
+
+        <div class="navbar-brand">
+            <img src="{% static 'images/logo.svg' %}" alt="">
+        </div>
+        {% if user.is_authenticated %}
+        <div class="stat-field">
+            <div class="stat-card">
+                <p>У вас {{ total_mailings }} рассылок</p>
+            </div>
+
+            <div class="stat-card" style="border-color: #4CAF50; background: #e8f5e9;">
+                <p>Активных рассылок:{{ active_mailings }}</p>
+            </div>
+
+            <div class="stat-card">
+                <p>Ваших уникальных получателей:{{ unique_recipients }}</p>
+            </div>
+        </div>
+        {% endif %}
+        <div class="navbar-side d-flex align-items-center gap-2">
+            <ul class="list-unstyled d-flex align-items-center m-0 p-0 gap-2">
+
+                {% if user.is_authenticated %}
+
+                    <li>
+                        <p>Привет, {{ user }}</p>
+                    </li>
+                    <li>
+                        <a href="/account/" class="nav-icon-link">
+                            <i class="fa-solid fa-home"></i>
+                            <span class="d-none d-md-inline">Личный кабинет</span>
+                        </a>
+                    </li>
+
+
+                {% endif %}
+                <!--                    <a href="#"><i class="fa-regular fa-heart"></i></a>-->
+
+
+                {% if user.is_authenticated %}
+
+                    <li>
+                        <form method="post" action="{% url 'users:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-icon-link">Выйти</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'users:register' %}" class="nav-icon-link">Регистрация</a></li>
+                    <li><a href="{% url 'users:login' %}" class="nav-icon-link">Login</a></li>
+                {% endif %}
+
+            </ul>
+
+        </div><!-- ./navbar-side -->
+
+    </div>
+</nav>
+

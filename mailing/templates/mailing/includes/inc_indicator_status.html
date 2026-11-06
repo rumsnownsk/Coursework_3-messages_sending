@@ -1,0 +1,12 @@
+{#inc_indicator_status.html#}
+{% if mailing.status == 'draft' %}
+    <span class="badge bg-secondary badge-lg">Черновик</span>
+{% elif mailing.status == 'running' %}
+    <span class="badge bg-warning text-dark badge-lg">Запущена</span>
+{% elif mailing.status == 'completed' %}
+    <span class="badge bg-success badge-lg">Завершена</span>
+{% elif mailing.status == 'failed' %}
+    <span class="badge bg-dark badge-lg">Ошибка</span>
+{% elif mailing.status == 'blocked' %}
+    <span class="badge bg-danger badge-lg"><i class="fa-solid fa-lock"></i> Отключена</span>
+{% endif %}

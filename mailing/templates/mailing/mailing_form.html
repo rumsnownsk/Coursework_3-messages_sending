@@ -1,0 +1,102 @@
+{% extends 'base_dashboard.html' %}
+{% block content %}
+    {% include 'mailing/includes/inc_message.html' %}
+
+    <div class="container mt-5">
+        <a href="{% url 'mailing:mailings' %}" class="btn btn-primary main-all-ategories">← назад</a>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row row-gap-4">
+            <div class="col-6">
+                {# --- Статус и кнопка остановки: СОСЕДНЯЯ форма, не внутри основной --- #}
+                {% if object %}
+                    <div class="mb-3 d-flex align-items-center gap-3">
+                        <div class="fw-bold">
+                            Статус: {% include 'mailing/includes/inc_indicator_status.html' %}
+                        </div>
+
+                        {% if object.status == 'running' %}
+                            <form method="post"
+                                  action="{% url 'mailing:mailing_stop' object.pk %}"
+                                  class="d-inline m-0">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Остановить рассылку? Письма больше не будут отправляться.');">
+                                    ⏹ Остановить
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if object %}<h2>Параметры рассылки</h2>{% else %}<h2>Создание рассылки</h2>{% endif %}
+
+                <form method="post" class="mt-2" novalidate>
+                    {% csrf_token %}
+                    <!-- Ошибки формы целиком (те, что подняты в clean()) -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <!-- Название -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Название рассылки</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <!-- Сообщение -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Сообщение</label>
+                        {{ form.message }}
+                        {% if form.message.errors %}
+                            <div class="text-danger">{{ form.message.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <!-- Получатели -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Получатели</label>
+
+                        <!-- Обертка для красоты (как на твоем фото) -->
+                        <div class="border rounded p-3 bg-light shadow-sm">
+
+                            <!-- ЭТОТ ТЕГ ОТРИСУЕТ ВСЕ ЧЕКБОКСЫ АВТОМАТИЧЕСКИ -->
+                            {{ form.recipients }}
+
+                        </div>
+
+                        {% if form.recipients.errors %}
+                            <div class="text-danger small">{{ form.recipients.errors.0 }}</div>
+                        {% endif %}
+                        <small class="text-muted">Выберите получателей из вашего списка.</small>
+                    </div>
+
+                    <!-- Даты в одну строку (сетка Bootstrap) -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Дата и время старта</label>
+                            {{ form.start_time }}
+                            {% if form.start_time.errors %}
+                                <div class="text-danger">{{ form.start_time.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Дата и время финиша</label>
+                            {{ form.end_time }}
+                            {% if form.end_time.errors %}
+                                <div class="text-danger">{{ form.end_time.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <a href="{% url 'mailing:mailings' %}" class="btn btn-secondary">Отмена</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

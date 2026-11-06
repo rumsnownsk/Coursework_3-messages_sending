@@ -60,6 +60,8 @@ def action_send_mailings(modeladmin, request, queryset):
         messages.success(request, f"{success_count} рассылок успешно отправлено.")
     if error_count:
         messages.error(request, f"В {error_count} рассылках были ошибки.")
+
+
 action_send_mailings.short_description = "Запустить выбранные рассылки"
 
 
@@ -125,6 +127,12 @@ class MailingAdmin(admin.ModelAdmin):
 
         # После действия возвращаем пользователя обратно в список рассылок
         return HttpResponseRedirect(reverse('admin:mailing_mailing_changelist'))
+
+    @admin.display(description='Автор')
+    def get_author_or_placeholder(self, obj):
+        if obj.created_by:
+            return obj.created_by.email or obj.created_by.username
+        return "Автор удалён"
 
 
 @admin.register(MailingAttempt)

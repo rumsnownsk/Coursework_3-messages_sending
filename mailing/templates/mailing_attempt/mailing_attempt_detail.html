@@ -1,0 +1,69 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}
+    Личный кабинет
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ attempt.mailing.name }}</strong> —
+                {{ attempt.created_at|date:"d.m.Y H:i" }}
+            </div>
+            <div>
+                {% if attempt.status == 'success' %}
+                    <span class="badge bg-success">Успешно</span>
+                {% else %}
+                    <span class="badge bg-danger">Ошибка</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-body">
+            <p>
+                Успешно: <strong>{{ attempt.success_count }}</strong> |
+                Ошибок: <strong>{{ attempt.fail_count }}</strong>
+            </p>
+            <p>Ответ сервера: {{ attempt.server_response }}</p>
+
+            <table class="table table-sm table-bordered">
+                <thead>
+                <tr>
+                    <th>Получатель</th>
+                    <th>Email</th>
+                    <th>Статус</th>
+                    <th>Ошибка</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in attempt.items.all %}
+                    <tr>
+                        <td>{{ item.recipient.full_name|default:"—" }}</td>
+                        <td>{{ item.email }}</td>
+                        <td>
+                            {% if item.status == 'sent' %}
+                                <span class="badge bg-primary">Отправлено</span>
+                            {% else %}
+                                <span class="badge bg-danger">Ошибка</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.error_message|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            Деталей нет — попытка создана до добавления этого функционала.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <a href="{% url 'mailing:attempts' %}" class="btn btn-outline-secondary btn-sm">
+                ← Ко всем попыткам
+            </a>
+        </div>
+    </div>
+{% endblock %}
